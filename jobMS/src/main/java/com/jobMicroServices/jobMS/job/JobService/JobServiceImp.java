@@ -1,9 +1,11 @@
 package com.jobMicroServices.jobMS.job.JobService;
 
 import com.jobMicroServices.jobMS.job.DTO.JobWithCompanyDTO;
+import com.jobMicroServices.jobMS.job.mapper.JobMapper;
 import com.jobMicroServices.jobMS.job.Job;
 import com.jobMicroServices.jobMS.job.JobRepo.JobRepository;
 import com.jobMicroServices.jobMS.job.external.Company;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import java.util.Optional;
 @Service
 public class JobServiceImp implements JobService{
     JobRepository jobRepository;
+    @Autowired
+    RestTemplate restTemplate;
     public JobServiceImp(JobRepository jobRepository){
         this.jobRepository = jobRepository;
     }
@@ -25,16 +29,17 @@ public class JobServiceImp implements JobService{
         List<Job> jobs = this.jobRepository.findAll();
         List<JobWithCompanyDTO> jobWithCompanyDTOS = new ArrayList<>();
 
-        RestTemplate restTemplate = new RestTemplate();
         for(Job job: jobs){
-            JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
-            jobWithCompanyDTO.setJob(job);
-            Company company = restTemplate.getForObject("http://localhost:8083/company/" + job.getCompanyId(), Company.class);
-            jobWithCompanyDTO.setCompany(company);
-            jobWithCompanyDTOS.add(jobWithCompanyDTO);
+            jobWithCompanyDTOS.add(getJobWithCompanyDTO(job));
         }
 
         return new ResponseEntity<>(jobWithCompanyDTOS, HttpStatus.OK);
+    }
+    public JobWithCompanyDTO getJobWithCompanyDTO(Job job){
+        Company company = this.restTemplate.getForObject("http://COMPANY-SERVICE:8083/company/" + job.getCompanyId(), Company.class);
+        JobWithCompanyDTO jobWithCompanyDTO = JobMapper.mapJobWithCompanyDTO(job, company);
+        jobWithCompanyDTO.setCompany(company);
+        return jobWithCompanyDTO;
     }
 
     @Override
@@ -44,8 +49,10 @@ public class JobServiceImp implements JobService{
     }
 
     @Override
-    public ResponseEntity<Job> getJobById(Long id) {
-        return new ResponseEntity<>(this.jobRepository.findById(id).orElse(null), HttpStatus.OK);
+    public ResponseEntity<JobWithCompanyDTO> getJobById(Long id) {
+        Job job = this.jobRepository.findById(id).orElse(null);
+        if (job == null) return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(this.getJobWithCompanyDTO(job), HttpStatus.OK);
     }
 
     @Override

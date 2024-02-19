@@ -9,7 +9,7 @@ import java.util.List;
 public interface JobService {
     ResponseEntity<List<JobWithCompanyDTO>> findAll();
     ResponseEntity<String> createJob(Job job);
-    ResponseEntity<Job> getJobById(Long id);
+    ResponseEntity<JobWithCompanyDTO> getJobById(Long id);
     ResponseEntity<String> DeleteJobById(Long id);
     ResponseEntity<String> updateJobById(Long id, Job reqJob);
 }

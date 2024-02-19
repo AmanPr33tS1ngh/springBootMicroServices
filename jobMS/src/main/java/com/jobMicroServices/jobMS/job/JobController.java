@@ -23,7 +23,7 @@ public class JobController {
         return this.jobService.createJob(job);
     }
     @GetMapping("/jobs/{id}")
-    public ResponseEntity<Job> getJobById(@PathVariable Long id){
+    public ResponseEntity<JobWithCompanyDTO> getJobById(@PathVariable Long id){
         return this.jobService.getJobById(id);
     }
     @DeleteMapping("/delete/{id}")
