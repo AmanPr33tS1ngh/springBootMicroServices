@@ -1,5 +1,6 @@
 package com.jobMicroServices.jobMS.job;
 
+import com.jobMicroServices.jobMS.job.DTO.JobWithCompanyDTO;
 import com.jobMicroServices.jobMS.job.JobService.JobService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ public class JobController {
         this.jobService = service;
     }
     @GetMapping("/jobs")
-    public ResponseEntity<List<Job>> findAll(){
+    public ResponseEntity<List<JobWithCompanyDTO>> findAll(){
         return this.jobService.findAll();
     }
     @PostMapping("/create")

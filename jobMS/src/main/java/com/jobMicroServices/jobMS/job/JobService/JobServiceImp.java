@@ -1,11 +1,15 @@
 package com.jobMicroServices.jobMS.job.JobService;
 
+import com.jobMicroServices.jobMS.job.DTO.JobWithCompanyDTO;
 import com.jobMicroServices.jobMS.job.Job;
 import com.jobMicroServices.jobMS.job.JobRepo.JobRepository;
+import com.jobMicroServices.jobMS.job.external.Company;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +21,20 @@ public class JobServiceImp implements JobService{
     }
 
     @Override
-    public ResponseEntity<List<Job>> findAll() {
-        return new ResponseEntity<>(this.jobRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<JobWithCompanyDTO>> findAll() {
+        List<Job> jobs = this.jobRepository.findAll();
+        List<JobWithCompanyDTO> jobWithCompanyDTOS = new ArrayList<>();
+
+        RestTemplate restTemplate = new RestTemplate();
+        for(Job job: jobs){
+            JobWithCompanyDTO jobWithCompanyDTO = new JobWithCompanyDTO();
+            jobWithCompanyDTO.setJob(job);
+            Company company = restTemplate.getForObject("http://localhost:8083/company/" + job.getCompanyId(), Company.class);
+            jobWithCompanyDTO.setCompany(company);
+            jobWithCompanyDTOS.add(jobWithCompanyDTO);
+        }
+
+        return new ResponseEntity<>(jobWithCompanyDTOS, HttpStatus.OK);
     }
 
     @Override
