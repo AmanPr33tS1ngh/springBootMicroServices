@@ -12,6 +12,15 @@ public class Job {
     private String maxSalary;
     private String location;
     private Long companyId;
+    private Long reviewId;
+
+    public Long getReviewId() {
+        return reviewId;
+    }
+
+    public void setReviewId(Long reviewId) {
+        this.reviewId = reviewId;
+    }
 
     public Job() {} // need to have this for object creation
     public Job(Long id, String title, String description, String minSalary, String maxSalary, String location, Long companyId){

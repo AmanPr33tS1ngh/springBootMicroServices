@@ -1,6 +1,7 @@
 package com.jobMicroServices.jobMS.job.JobService;
 
 import com.jobMicroServices.jobMS.job.DTO.JobWithCompanyDTO;
+import com.jobMicroServices.jobMS.job.clients.CompanyClient;
 import com.jobMicroServices.jobMS.job.mapper.JobMapper;
 import com.jobMicroServices.jobMS.job.Job;
 import com.jobMicroServices.jobMS.job.JobRepo.JobRepository;
@@ -20,8 +21,10 @@ public class JobServiceImp implements JobService{
     JobRepository jobRepository;
     @Autowired
     RestTemplate restTemplate;
-    public JobServiceImp(JobRepository jobRepository){
+    private CompanyClient companyClient;
+    public JobServiceImp(JobRepository jobRepository, CompanyClient companyClient){
         this.jobRepository = jobRepository;
+        this.companyClient = companyClient;
     }
 
     @Override
@@ -36,7 +39,8 @@ public class JobServiceImp implements JobService{
         return new ResponseEntity<>(jobWithCompanyDTOS, HttpStatus.OK);
     }
     public JobWithCompanyDTO getJobWithCompanyDTO(Job job){
-        Company company = this.restTemplate.getForObject("http://COMPANY-SERVICE:8083/company/" + job.getCompanyId(), Company.class);
+        Company company = this.companyClient.getCompany(job.getCompanyId());
+        // Company company = this.restTemplate.getForObject("http://COMPANY-SERVICE:8083/company/" + job.getCompanyId(), Company.class);
         JobWithCompanyDTO jobWithCompanyDTO = JobMapper.mapJobWithCompanyDTO(job, company);
         jobWithCompanyDTO.setCompany(company);
         return jobWithCompanyDTO;
